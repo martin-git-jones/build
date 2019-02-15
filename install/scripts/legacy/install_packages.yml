@@ -1,0 +1,215 @@
+- name: Install the latest version vim
+  yum:
+    name: vim
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version php-pgsql.x86_64
+  yum:
+    name: php-pgsql
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version php-bcmath.x86_64
+  yum:
+    name: php-bcmath.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version php-mbstring.x86_64
+  yum:
+    name: php-mbstring.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version libmicrohttpd-devel.i686
+  yum:
+    name: libmicrohttpd-devel.i686
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version libmicrohttpd-devel.x86_64
+  yum:
+    name: libmicrohttpd-devel.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version httpd.x86_64
+  yum:
+    name: httpd.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version httpd-devel.x86_64
+  yum:
+    name: httpd-devel.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version httpd-tools.x86_64
+  yum:
+    name: httpd-tools.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version libmicrohttpd.i686
+  yum:
+    name: libmicrohttpd.i686
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version libmicrohttpd.x86_64
+  yum:
+    name: libmicrohttpd.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version mod_auth_mellon.x86_64
+  yum:
+    name: mod_auth_mellon.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version mod_dav_svn.x86_64
+  yum:
+    name: mod_dav_svn.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version apr-util-pgsql.x86_64
+  yum:
+    name: apr-util-pgsql.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version dovecot-pgsql.x86_64
+  yum:
+    name: dovecot-pgsql.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version libdbi-dbd-pgsql.x86_64
+  yum:
+    name: libdbi-dbd-pgsql.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version redland-pgsql.x86_64
+  yum:
+    name: redland-pgsql.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version rsyslog-pgsql.x86_64
+  yum:
+    name: rsyslog-pgsql.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version libcurl-devel.i686
+  yum:
+    name: libcurl-devel.i686
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version libcurl-devel.x86_64
+  yum:
+    name: libcurl-devel.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version libcurl.i686
+  yum:
+    name: libcurl.i686
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version libcurl.x86_64
+  yum:
+    name: libcurl.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version perl-WWW-Curl.x86_64
+  yum:
+    name: perl-WWW-Curl.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version python-pycurl.x86_64
+  yum:
+    name: python-pycurl.x86_64
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version libssh2-devel
+  yum:
+    name: libssh2-devel
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version libidn-devel
+  yum:
+    name: libidn-devel
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version OpenIPMI-devel
+  yum:
+    name: OpenIPMI-devel
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version postgresql-devel
+  yum:
+    name: postgresql-devel
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version qt-postgresql
+  yum:
+    name: qt-postgresql
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version qt3-PostgreSQL
+  yum:
+    name: qt3-PostgreSQL
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version net-snmp-devel
+  yum:
+    name: net-snmp-devel
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version java-1.8.0-openjdk-devel
+  yum:
+    name: java-1.8.0-openjdk-devel
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version mod_ssl
+  yum:
+    name: mod_ssl
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version openssh
+  yum:
+    name: openssh
+    state: latest
+    validate_certs: no
+
+- name: Install the latest version libevent
+  yum:
+    name: libevent
+    state: latest
+    validate_certs: no
+    
+- name: Install the latest version libevent-devel
+  yum:
+    name: libevent-devel
+    state: latest
+    validate_certs: no

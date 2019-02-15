@@ -1,0 +1,79 @@
+- group:
+    name: zabbix
+    state: present
+
+- user:
+    name: zabbix
+    shell: /bin/bash
+    group: zabbix
+    state: present
+
+- name: Download Zabbix
+  shell: /usr/local/bin/aws s3 cp s3://avivauknonprod/applications/guidewire/software/Zabbix3.4.3/zabbix-3.4.3.tar.gz /tmp
+  become: yes
+  become_user: ec2-user
+  become_method: enable
+
+- name: Copy file to /opt
+  copy:
+    src: /tmp/zabbix-3.4.3.tar.gz
+    dest: /opt/zabbix-3.4.3.tar.gz
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Extract Zabbix files
+  shell: tar -zxvf /opt/zabbix-3.4.3.tar.gz -C /opt/
+
+- name: Configure Zabbix installation
+  shell: /opt/zabbix-3.4.3/configure --enable-server --enable-agent --with-postgresql --with-libcurl --with-net-snmp --enable-ipv6 --with-openipmi --with-ssh2 --with-ldap --enable-java
+  args:
+    chdir: /opt/zabbix-3.4.3/
+
+- name: Make Zabbix installation
+  shell: make
+  args:
+    chdir: /opt/zabbix-3.4.3/
+
+- name: Install Zabbix
+  shell: make install
+  args:
+    chdir: /opt/zabbix-3.4.3/
+
+- copy:
+    src: /opt/zabbix-3.4.3/misc/init.d/fedora/core5/zabbix_server
+    dest: /etc/init.d/zabbix_server
+    owner: root
+    group: root
+    mode: 0755
+
+- copy:
+    src: /opt/zabbix-3.4.3/misc/init.d/fedora/core5/zabbix_agentd
+    dest: /etc/init.d/zabbix_agentd
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Add server service
+  shell: chkconfig --add zabbix_server
+
+- name: Set server service run level
+  shell: chkconfig --level 35 zabbix_server on
+
+- name: Add agent service
+  shell: chkconfig --add zabbix_agentd
+
+- name: Set agent service run level
+  shell: chkconfig --level 35 zabbix_agentd on
+
+- name: Start and enable server service
+  systemd:
+    name: zabbix_server
+    state: started
+    enabled: yes
+
+- name: Start and enable agent service
+  systemd:
+    name: zabbix_agentd
+    state: started
+    enabled: yes

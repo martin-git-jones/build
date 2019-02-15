@@ -1,0 +1,33 @@
+- name: Stop and disable puppet service
+  systemd: 
+    name: puppet
+    state: stopped
+    enabled: no
+
+- name: Install the latest version of httpd
+  yum:
+    name: httpd
+    state: latest
+
+- name: Start and enable httpd service
+  systemd: 
+    name: httpd
+    state: started
+    enabled: yes
+ 
+- name: Create Zabbix frontend folder
+  shell: mkdir /var/www/html/zabbix
+  
+- copy:
+    src: /opt/zabbix-3.4.3/frontends/php/
+    dest: /var/www/html/zabbix/
+    owner: root
+    group: root
+    mode: 0755
+  
+- file:
+    path: /var/www/html/zabbix/
+    state: directory
+    owner: root
+    group: root
+    mode: 0755

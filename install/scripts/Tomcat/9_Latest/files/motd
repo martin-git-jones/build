@@ -1,0 +1,8 @@
+Aliases description:
+- show(pc,cc,cm,gpa)log value - check the log file (value - how many lines should be displayed)
+- foldersize or ds - check the size of files/folders in the current folder
+- tomcat - check the current status of tomcat
+- tomcatstop - stop tomcat service
+- tomcatstart - start tomcat service
+- tomcatdir - move to tomat home directory
+- endpoints(pc/cc/cm) - move to endpoint path

@@ -1,0 +1,44 @@
+---
+- name: Download legacy-news.tar file.
+  get_url:
+    url: "http://nexus-pre.avivaaws.com/nexus/content/repositories/guidewire-releases/com/aviva/ukgi/gw/files/legacy-news.tar"
+    dest: "/home/ec2-user/legacy-news.tar"
+    mode: 0755
+  when: legacy_version is undefined
+
+- name: Unarchive legacy-news.tar file.
+  unarchive:
+    src: /home/ec2-user/legacy-news.tar
+    dest: /opt/
+    remote_src: True
+    mode: 0755
+    owner: ec2-user
+    
+- name: Remove index.html file.
+  shell:
+    sudo rm /opt/legacy-news/index.html
+    
+- name: Remove GuidewireNews.md file.
+  shell:
+    sudo rm /opt/legacy-news/assets/GuidewireNews.md
+    
+- name: Add 80/tcp firewall rule.
+  firewalld:
+    port: 80/tcp
+    permanent: true
+    state: enabled
+    
+- name: Copy start.sh file.
+  copy:
+    src: /opt/legacy-news/start.sh
+    dest: /etc/init.d/legacy-news
+    mode: 0755
+    
+- name: Start legacy-news.
+  shell:
+    echo /etc/rc.d/init.d/legacy-news >> /etc/rc.d/rc.local
+    
+- name: Add chmod to local file.
+  file:
+    path: /etc/rc.d/rc.local
+    mode: 0744

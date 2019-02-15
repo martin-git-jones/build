@@ -1,0 +1,94 @@
+---
+- name: Install Java 1.7
+  yum: name=java-1.7.0-openjdk state=present
+  when: dedicated_java is undefined
+
+- name: add group for tomcat service
+  group: name={{ tomcat_group }}
+
+- name: add user for tomcat service
+  user: name={{ tomcat_user }} group={{ tomcat_group }} home={{ tomcat_home }} createhome=no
+  become: True
+  become_method: sudo
+
+- name: Download Tomcat
+  get_url: url={{ tomcat_pkg_url }} dest=/opt/apache-tomcat-{{ tomcat_version }}.tar.gz
+
+- name: Extract tomcat archive
+  unarchive:
+    remote_src: yes
+    src: "/opt/apache-tomcat-{{ tomcat_version }}.tar.gz"
+    dest: "/opt/"
+    group: "{{ tomcat_group }}"
+    owner: "{{ tomcat_user }}"
+    mode: 0755
+
+- name: Create tomcat home directory
+  file:
+    state: directory
+    path: "{{ tomcat_home }}"
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+    mode: 0755
+
+- name: Copy and replace (if needed) tomcat directory - step 1
+  command: cp -R /opt/apache-tomcat-{{ tomcat_version }}/. {{ tomcat_home }}
+
+- name: Copy and replace (if needed) tomcat directory - step 2
+  file:
+    path: /opt/apache-tomcat-{{ tomcat_version }}
+    state: absent
+
+#  command: rm -rf /opt/apache-tomcat-{{ tomcat_version }}
+
+#- name: Extract archive
+#  command: chdir=/usr/share /bin/tar xvf /opt/apache-tomcat-7.0.61.tar.gz -C /opt/ creates=/opt/apache-tomcat-7.0.61
+
+#- name: Symlink install directory
+#  file: src=/opt/apache-tomcat-7.0.61 path=/usr/share/tomcat state=link
+
+- name: Configure Tomcat server
+  template: src=server.xml dest={{ tomcat_home }}/conf/
+  notify: restart tomcat
+
+- name: Configure Tomcat users
+  template: src=tomcat-users.xml dest={{ tomcat_home }}/conf/
+  notify: restart tomcat
+
+- name: Configure Tomcat setenv.sh file
+  template: src=setenv.sh dest={{ tomcat_home }}/bin/
+  notify: restart tomcat
+
+- name: Change ownership of Tomcat installation
+  file: path={{ tomcat_home }} owner={{ tomcat_user }} group={{ tomcat_group }} mode=0755 state=directory recurse=yes
+
+- name: Configure Tomcat service
+  template: src=tomcat.service dest=/etc/systemd/system/{{ tomcat_service }}.service
+
+- name: Enable Tomcat service
+  systemd:
+    name: "{{ tomcat_service }}"
+    enabled: yes
+    masked: no
+
+#- name: Install Tomcat init script
+#  copy: src=tomcat-initscript.sh dest=/etc/init.d/tomcat mode=0755
+
+- name: Start Tomcat
+  service: name={{ tomcat_service }} state=started enabled=yes
+
+- name: Deploy iptables rules
+  template: src=iptables-save dest=/etc/sysconfig/iptables
+  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6'"
+  notify: restart iptables
+
+- name: insert firewalld rule for tomcat http port
+  firewalld: port={{ http_port }}/tcp permanent=true state=enabled immediate=yes
+  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
+
+- name: insert firewalld rule for tomcat https port
+  firewalld: port={{ https_port }}/tcp permanent=true state=enabled immediate=yes
+  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
+
+- name: wait for tomcat to start
+  wait_for: port={{http_port}}

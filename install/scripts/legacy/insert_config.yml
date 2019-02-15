@@ -1,0 +1,119 @@
+- name: Set parameter max_execution_time in /etc/php.ini    
+  lineinfile:
+    path: /etc/php.ini
+    regexp: "max_execution_time = 30"
+    line: "max_execution_time = 600"
+    state: present
+    
+- name: Set parameter max_input_time in /etc/php.ini    
+  lineinfile:
+    path: /etc/php.ini
+    regexp: "max_input_time = 60"
+    line: "max_input_time = 600"
+    state: present
+
+- name: Set parameter memory_limit in /etc/php.ini    
+  lineinfile:
+    path: /etc/php.ini
+    regexp: "memory_limit = 128M"
+    line: "memory_limit = 256M"
+    state: present
+
+- name: Set parameter post_max_size in /etc/php.ini    
+  lineinfile:
+    path: /etc/php.ini
+    regexp: "post_max_size = 8M"
+    line: "post_max_size = 32M"
+    state: present
+
+- name: Set parameter upload_max_filesize in /etc/php.ini    
+  lineinfile:
+    path: /etc/php.ini
+    regexp: "upload_max_filesize = 2M"
+    line: "upload_max_filesize = 16M"
+    state: present
+    
+- name: Set parameter date.timezone in /etc/php.ini    
+  lineinfile:
+    path: /etc/php.ini
+    regexp: ";date.timezone ="
+    line: "date.timezone = Europe/Dublin"
+    state: present
+    
+- name: Set parameter DBHost in /usr/local/etc/zabbix_server.conf   
+  lineinfile:
+    path: /usr/local/etc/zabbix_server.conf
+    regexp: "# DBHost=localhost"
+    line: "DBHost=euw1bcgwutil010.czup1bxlng88.eu-west-1.rds.amazonaws.com"
+    state: present    
+    
+- name: Set parameter DBName in /usr/local/etc/zabbix_server.conf 
+  lineinfile:
+    path: /usr/local/etc/zabbix_server.conf
+    regexp: "DBName=zabbix"
+    line: "DBName=zabbix"
+    state: present
+    
+- name: Set parameter DBUser in /usr/local/etc/zabbix_server.conf    
+  lineinfile:
+    path: /usr/local/etc/zabbix_server.conf
+    regexp: "DBUser=zabbix"
+    line: "DBUser=zabbix_admin"
+    state: present    
+    
+- name: Set parameter DBPassword in /usr/local/etc/zabbix_server.conf  
+  lineinfile:
+    path: /usr/local/etc/zabbix_server.conf
+    regexp: "# DBPassword="
+    line: "DBPassword=zabbix123"
+    state: present
+
+- name: Set parameter DBPort in /usr/local/etc/zabbix_server.conf   
+  lineinfile:
+    path: /usr/local/etc/zabbix_server.conf
+    regexp: "# DBPort=3306"
+    line: "DBPort=5432"
+    state: present
+    
+- name: Set parameter Server in /usr/local/etc/zabbix_agentd.conf  
+  lineinfile:
+    path: /usr/local/etc/zabbix_agentd.conf
+    regexp: "Server=127.0.0.1"
+    line: "Server=gw-zabbix.avivaaws.com"
+    state: present  
+
+- name: Switch off parameter ServerActive in /usr/local/etc/zabbix_agentd.conf  
+  lineinfile:
+    path: /usr/local/etc/zabbix_agentd.conf
+    regexp: "ServerActive=127.0.0.1"
+    line: "#ServerActive=127.0.0.1"
+    state: present 
+    
+- name: Set parameter Hostname in /usr/local/etc/zabbix_agentd.conf  
+  lineinfile:
+    path: /usr/local/etc/zabbix_agentd.conf
+    regexp: "Hostname=Zabbix server"
+    line: "Hostname=gw-zabbix.avivaaws.com"
+    state: present 
+    
+- name: Set parameter environment in /etc/puppetlabs/puppet/puppet.conf as httpd
+  lineinfile:
+    path: /etc/puppetlabs/puppet/puppet.conf
+    regexp: "environment = production"
+    line: "environment = httpd"
+    state: present
+    owner: root
+    group: root
+    mode: 0666
+    
+- name: Add entry into fstab
+  shell: "echo '/var/zabbixswap swap swap defaults 0 0' >> /etc/fstab"
+  
+- name: Create swap partition
+  shell: dd if=/dev/zero of=/var/zabbixswap bs=1M count=2048
+  
+- name: Set swap space
+  shell: mkswap /var/zabbixswap  
+
+- name: Enable swap space
+  shell: swapon /var/zabbixswap

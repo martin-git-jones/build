@@ -1,0 +1,15 @@
+---
+- hosts: tag_GW_DeployApp_True
+  user: ec2-user
+  become: true
+  tasks:
+  - name: copy-install-script
+    copy: 
+     src: install.sh 
+     dest: /home/ec2-user/install.sh
+     owner: ec2-user
+     group: ec2-user
+     mode: 0750
+  - name: Run install script
+    shell: sudo /home/ec2-user/install.sh 
+

@@ -1,0 +1,104 @@
+- name: Create directories for appdynamics
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+    mode: 0755
+  with_items:
+    - '/opt/appdynamics/AppServerAgent-4.3.2.3'
+    - '/opt/appdynamics/MachineAgent-4.3.2.3'
+
+- name: Dowloading the zip file for AppServerAgent-4.3.2.3
+  command: "/usr/local/bin/aws s3 cp s3://avivauknonprod/applications/guidewire/software/Appd/AppServerAgent-4.3.2.3.zip /tmp"
+  become_user: ec2-user
+  become_method: enable
+ 
+
+- name: Dowloading the zip file for MachineAgent-4.3.2.3
+  command: "/usr/local/bin/aws s3 cp s3://avivauknonprod/applications/guidewire/software/Appd/machineagent-bundle-64bit-linux-4.3.2.3.zip /tmp"
+  become_user: ec2-user
+  become_method: enable
+  
+
+- name: Moving AppServerAgent-4.3.2.3 zip file from /tmp to /opt
+  copy:
+    src: /tmp/AppServerAgent-4.3.2.3.zip
+    dest: /opt/appdynamics/AppServerAgent-4.3.2.3
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+    mode: 0755
+
+- name: Moving MachineAgent-4.3.2.3 zip file from /tmp to /opt
+  copy:
+    src: /tmp/machineagent-bundle-64bit-linux-4.3.2.3.zip
+    dest: /opt/appdynamics/MachineAgent-4.3.2.3
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Unpacking the zip file for AppServerAgent-4.3.2.3
+  unarchive:
+    remote_src: yes
+    src: /opt/appdynamics/AppServerAgent-4.3.2.3/AppServerAgent-4.3.2.3.zip
+    dest: /opt/appdynamics/AppServerAgent-4.3.2.3
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+    mode: 0755
+
+- name: Unpacking the zip file for MachineAgent-4.3.2.3
+  unarchive:
+    remote_src: yes
+    src: /opt/appdynamics/MachineAgent-4.3.2.3/machineagent-bundle-64bit-linux-4.3.2.3.zip
+    dest: /opt/appdynamics/MachineAgent-4.3.2.3/
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Changing the permission of MachineAgent-4.3.2.3
+  file:
+    path: /opt/appdynamics/MachineAgent-4.3.2.3
+    owner: root
+    group: root
+    mode: 0755
+    recurse: yes
+
+- name: Downloading GuidewireAgentPlugin.jar from s3 bucket to tmp
+  command: "/usr/local/bin/aws s3 cp s3://avivauknonprod/applications/guidewire/software/Appd/GuidewireAgentPlugin.jar /tmp"
+  become_user: ec2-user
+  become_method: enable
+  
+  
+- name: Downloading app-agent-config.xml from s3 to tmp
+  command: "/usr/local/bin/aws s3 cp s3://avivauknonprod/applications/guidewire/software/Appd/app-agent-config.xml /tmp"
+  become_user: ec2-user
+  become_method: enable
+ 
+
+- name: Moving GuidewireAgentPlugin.jar from /tmp to /opt/appdynamics/AppServerAgent-4.3.2.3/ver4.3.2.3/sdk-plugins
+  copy: 
+    src: /tmp/GuidewireAgentPlugin.jar
+    dest: /opt/appdynamics/AppServerAgent-4.3.2.3/ver4.3.2.3/sdk-plugins
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+    mode: 0755
+
+- name: Moving app-agent-config.xml from /tmp to /opt/appdynamics/AppServerAgent-4.3.2.3/ver4.3.2.3/conf
+  copy:
+    src: /tmp/app-agent-config.xml
+    dest: /opt/appdynamics/AppServerAgent-4.3.2.3/ver4.3.2.3/conf
+    owner: "{{ tomcat_user }}"
+    group: "{{ tomcat_group }}"
+    mode: 0755
+
+- name: Deleting the downloaded files from tmp folder
+  file:
+    path: "{{ item }}"
+    state: absent
+    owner: root
+    group: root
+  with_items:
+    - '/tmp/AppServerAgent-4.3.2.3.zip'
+    - '/tmp/machineagent-bundle-64bit-linux-4.3.2.3.zip'
+    - '/tmp/GuidewireAgentPlugin.jar'
+    - '/tmp/app-agent-config.xml'

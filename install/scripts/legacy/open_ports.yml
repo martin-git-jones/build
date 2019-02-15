@@ -1,0 +1,70 @@
+- firewalld:
+    port: 25/tcp
+    zone: public
+    state: enabled
+    permanent: true
+    immediate: true
+    
+- firewalld:
+    port: 80/tcp
+    zone: public
+    state: enabled
+    permanent: true
+    immediate: true
+    
+- firewalld:
+    port: 8123/tcp
+    zone: public
+    state: enabled
+    permanent: true
+    immediate: true
+    
+- firewalld:
+    port: 10050/tcp
+    zone: public
+    state: enabled
+    permanent: true
+    immediate: true
+    
+- firewalld:
+    port: 10051/tcp
+    zone: public
+    state: enabled
+    permanent: true
+    immediate: true
+    
+- iptables:
+    chain: INPUT
+    jump: ACCEPT
+    protocol: tcp
+    source_port: 23
+    
+- iptables:
+    chain: INPUT
+    jump: ACCEPT
+    protocol: tcp
+    source_port: 25
+    
+- iptables:
+    chain: INPUT
+    jump: ACCEPT
+    protocol: tcp
+    source_port: 80
+    
+- iptables:
+    chain: INPUT
+    jump: ACCEPT
+    protocol: tcp
+    source_port: 8123
+    
+- iptables:
+    chain: INPUT
+    jump: ACCEPT
+    protocol: tcp
+    source_port: 10050
+    
+- iptables:
+    chain: INPUT
+    jump: ACCEPT
+    protocol: tcp
+    source_port: 10051

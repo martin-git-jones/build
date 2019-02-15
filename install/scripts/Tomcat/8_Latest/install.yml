@@ -1,0 +1,11 @@
+---
+- hosts: tag_GW_TomcatVersion_8_Latest
+  user: ec2-user
+  sudo: yes
+  tasks:
+  - name: Install Tomcat 8
+    yum:
+      name: tomcat 
+      state: present
+  - name: Post-install configuration
+    shell: step1

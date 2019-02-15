@@ -1,0 +1,88 @@
+---
+- hosts: tag_GW_JavaVersion_Oracle_1_8_Latest
+  vars:
+    oracle_java_url: "http://nexus-pre.avivaaws.com/nexus/service/local/repositories/guidewire-releases/content/com/aviva/ukgi/gw/files"
+    oracle_java_tar: "jdk-8u181-linux-x64.tar.gz"
+    java_home: "/usr/java/jdk1.8.0_181"
+  user: ec2-user
+  become: True
+  tasks:
+  - name: Create temp directory
+    file:
+      path: /usr/java
+      state: directory
+      mode: 0755
+  
+  - name: Download Oracle Java installation package
+    get_url:
+      url: "{{ oracle_java_url }}/{{ oracle_java_tar }}"
+      dest: "/usr/java/{{ oracle_java_tar }}"
+      mode: 0755
+  
+  - name: Install oracle Java
+    unarchive:
+      remote_src: yes
+      src: "/usr/java/{{ oracle_java_tar }}"
+      dest: "/usr/java/" 
+      owner: root
+      group: root    
+      mode: 0755
+  #    recurse: yes
+  - name: Changing permission for java folder
+    file: dest=/usr/java owner=root group=root mode=0755 recurse=yes
+  
+  - name: remove java file from java_home
+    command: "rm -rf {{ java_home }}/bin/java" 
+    
+  - name: Link oracle Java
+    file:
+      state: link
+      src: "{{ java_home }}/jre/bin/java"
+      dest: "{{ java_home }}/bin/java"
+      mode: 0755
+  
+  - name: Disable weak ciphers for SSL negotiation
+    lineinfile:
+      path: "{{ java_home }}/jre/lib/security/java.security"
+      regexp: "jdk.tls.legacyAlgorithms= \
+          K_NULL, C_NULL, M_NULL, \
+          DH_anon, ECDH_anon, \
+          RC4_128, RC4_40, DES_CBC, DES40_CBC, \
+          3DES_EDE_CBC"
+      line: "jdk.tls.disabledAlgorithms=SSLv3, RC4, DH keySize < 768, 3DES_EDE_CBC, DES"
+      backrefs: yes
+  
+  - name: Download unrestricted policy files for Oracle Java
+    get_url:
+      url: "{{ oracle_java_url }}//JCEPolicyJDK8/{{ item }}"
+      dest: "{{ java_home }}/jre/lib/security/{{ item }}"
+      force: yes
+      mode: 0644
+      owner: root
+      group: root
+    with_items:
+      - 'local_policy.jar'
+      - 'US_export_policy.jar'  
+  - name: Copy certs locally and install
+    copy:
+      src: ../../common/install.sh
+      dest: "/home/ec2-user/"
+      mode: 0755
+      owner: "ec2-user"
+      group: "ec2-user"
+  - name: Run local config script
+    shell: /home/ec2-user/install.sh
+
+
+
+
+
+
+
+
+
+
+
+
+
+

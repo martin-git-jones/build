@@ -1,0 +1,396 @@
+---
+- hosts: tag_GW_TomcatVersion_9_Latest
+  vars:
+    tomcat_home: /opt/tomcat/app
+    tomcat_user: tomcat
+    tomcat_group: tomcat
+    tomcat_version: "9.0.14"
+    tomcat_pkg_url: "http://nexus-pre.avivaaws.com/nexus/content/repositories/guidewire-releases/com/aviva/ukgi/gw/files/apache-tomcat-9.0.14.tar.gz"
+    tomcat_service: "tomcat"
+    java_home: "/usr/bin/java"
+    dedicated_java: ""
+    http_port: 8080
+    https_port: 8443
+    # This will configure a default manager-gui user:
+    admin_username: admin
+    admin_password: gwadmin
+  user: ec2-user
+  sudo: yes
+  tasks:
+  - name: Install Java 1.8
+    yum: name=java-1.8.0-openjdk state=present
+    when: dedicated_java is undefined
+  
+  - name: add group for tomcat service
+    group: name={{ tomcat_group }}
+  
+  - name: add user for tomcat service
+    user: name={{ tomcat_user }} group={{ tomcat_group }} home={{ tomcat_home }} createhome=no
+    become: True
+    become_method: sudo
+  
+  - name: Download Tomcat
+    get_url: url={{ tomcat_pkg_url }} dest=/opt/apache-tomcat-{{ tomcat_version }}.tar.gz
+  
+  - name: Extract tomcat archive
+    unarchive:
+      remote_src: yes
+      src: "/opt/apache-tomcat-{{ tomcat_version }}.tar.gz"
+      dest: "/opt/"
+      group: "{{ tomcat_group }}"
+      owner: "{{ tomcat_user }}"
+      mode: 0755
+  
+  - name: Create tomcat home directory
+    file:
+      state: directory
+      path: "{{ tomcat_home }}"
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+      mode: 0755
+  
+  - name: Copy and replace (if needed) tomcat directory - step 1
+    command: cp -R /opt/apache-tomcat-{{ tomcat_version }}/. {{ tomcat_home }}
+  
+  - name: Copy and replace (if needed) tomcat directory - step 2
+    file:
+      path: /opt/apache-tomcat-{{ tomcat_version }}
+      state: absent
+  - name: Configure Tomcat server
+    copy:
+      src: server.xml
+      dest: /opt/tomcat/app/conf/
+      owner: tomcat
+      group: tomcat
+      mode: 0750
+
+  - name: Configure Tomcat server
+    copy:
+      src: setenv.sh
+      dest: /opt/tomcat/app/bin/
+      owner: tomcat
+      group: tomcat
+      mode: 0750
+  - name: Configure Tomcat server
+    copy:
+      src: tomcat-users.xml
+      dest: /opt/tomcat/app/conf/
+      owner: tomcat
+      group: tomcat
+      mode: 0750
+
+  - name: Configure Tomcat server
+    copy:
+      src: tomcat.service
+      dest: /etc/systemd/system/{{ tomcat_service }}.service
+      owner: tomcat
+      group: tomcat
+      mode: 0750
+
+  - name: Change ownership of Tomcat installation
+    file: path={{ tomcat_home }} owner={{ tomcat_user }} group={{ tomcat_group }} mode=0755 state=directory recurse=yes
+  
+  - name: Enable Tomcat service
+    systemd:
+      name: "{{ tomcat_service }}"
+      enabled: yes
+      masked: no
+ 
+  - name: Start Tomcat
+    service: name={{ tomcat_service }} state=started enabled=yes
+ 
+  - name: insert firewalld rule for tomcat http port
+    firewalld: port={{ http_port }}/tcp permanent=true state=enabled immediate=yes
+    when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
+  
+  - name: insert firewalld rule for tomcat https port
+    firewalld: port={{ https_port }}/tcp permanent=true state=enabled immediate=yes
+    when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
+  
+  - name: wait for tomcat to start
+    wait_for: port={{http_port}}
+   
+  - name: Create .ssh directory for tomcat
+    file:
+      state: directory
+      path: "{{ tomcat_home }}/.ssh"
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+      mode: 0755
+  
+  - name: Remove examples for tomcat
+    file:
+      state: absent
+      path: "{{ tomcat_home }}/webapps/examples"
+  
+  - name: Download additional libraries for Oracle databases
+    get_url:
+      url: "http://nexus-pre.avivaaws.com/nexus/content/repositories/guidewire-releases/com/aviva/ukgi/gw/files/ojdbc7-12.1.0.2.0-prod.jar"
+      dest: "{{ tomcat_home }}/lib/ojdbc7-12.1.0.2.0-prod.jar"
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+      mode: 0755
+  
+  - name: Copy datasources files
+    copy:
+      src: datasources/
+      dest: "{{ tomcat_home }}/conf/Catalina/localhost"
+      mode: 0755
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+  
+  - name: Create additional directory /tmp114
+    file:
+      state: directory
+      path: /tmp114
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+      mode: 0755
+  
+  - name: Create additional directory /home/apps/guidewire/mid
+    file:
+      state: directory
+      path: /home/apps/guidewire/mid
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+      mode: 0755
+  
+  - name: Add prosperities location for GW enviroments
+    command: "sed -i '/^common.loader/ s|$|,/usr/WSApps/UKGGPC/Guidewire/config/PC,/usr/WSApps/UKGGCC/Guidewire/config/CC,/usr/WSApps/UKGGCM/Guidewire/config/CM|' {{ tomcat_home }}/conf/catalina.properties"
+  
+  - name: Create config files directory (CC)
+    file:
+      state: directory
+      path: /usr/WSApps/UKGGCC/Guidewire/config/CC
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+      mode: 0755
+  
+  - name: Create directory for logs (CC)
+    file:
+      state: directory
+      path: /usr/WSApps/UKGGCC/Guidewire/logs
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+      mode: 0755
+  
+  - name: Create config files directory (PC GPA)
+    file:
+      state: directory
+      path: /usr/WSApps/UKGGPC/Guidewire/config/PC
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+      mode: 0755
+  
+  - name: Create directory for logs (PC GPA)
+    file:
+      state: directory
+      path: /usr/WSApps/UKGGPC/Guidewire/logs
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+      mode: 0755
+  
+  - name: Create directory for logs (PC2)
+    file:
+      state: directory
+      path: /usr/WSApps/UKGGPC2/Guidewire/logs
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+      mode: 0755
+  
+  - name: Create config files directory symlink (PC2)
+    file:
+      src: "/usr/WSApps/UKGGPC/Guidewire/config"
+      path: "/usr/WSApps/UKGGPC2/Guidewire/config"
+      state: link
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+  
+  - name: Create config files directory (CM)
+    file:
+      state: directory
+      path: /usr/WSApps/UKGGCM/Guidewire/config/CM
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+      mode: 0755
+  
+  - name: Create directory for logs (CM)
+    file:
+      state: directory
+      path: /usr/WSApps/UKGGCM/Guidewire/logs
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+      mode: 0755
+  
+  - name: Download and deploy Logreader application
+    get_url:
+      url: http://nexus-pre.avivaaws.com/nexus/content/repositories/guidewire-releases/com/aviva/ukgi/gw/files/logreader.war
+      dest: "{{ tomcat_home }}/webapps/logreader.war"
+      mode: 0755
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+  
+  - name: Add tomcat user public key
+    lineinfile:
+      path: "{{ tomcat_home }}/.ssh/authorized_keys"
+      line: "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEA8O64+qGlIjFAGY+9RSMmkMqbxPLqqX8ubQoQvDHwOTerF428VmG0IovD4Y2T5I6mRFnuU5PjF3GR1rChJOdY57WpzRugft3FAsHO5bSL97EcMREn5nuxjppmpCSLnT/YKSqLyfkBsCDnDoia7IZbnKmDAJqTg4seWJNoYrWsqZe3D/l2Bie67iiN69aPp+P5qq80+nb9020zZj0wmMRNzBw0fb6KHv7yQijqNPnj5Jx2k4hbKJJ+4SdJtF8xgQrozf04LCZENg2tw6PlpMN/ULS3Ty7G8KPwkF/aUQ2DGX1Oqzh3PM+BES6DV18lOuLByCFy6AQsjNi53Jmlr/TQVw== rsa-key-20160613"
+      state: present
+      mode: 0755
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+      create: yes
+  
+  - name: Add .bashrc file for tomcat user
+    copy:
+      src: "{{ item }}"
+      dest: "/opt/tomcat/app/"
+      mode: 0755
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+    with_items:
+      - '~/.bashrc'
+      - '~/.bash_profile'
+  
+  - name: Add visudo configuration
+    lineinfile:
+      path: /etc/sudoers
+      line: "{{ item }}"
+      state: present
+    with_items:
+       - '%acc_ukgi_gwdevsu ALL=(ALL) NOPASSWD:ALL'
+       - 'Defaults    env_keep +=PATH'
+       - 'Defaults        exempt_group=ec2-user'
+       - 'Cmnd_Alias TOMCATCTL = /usr/bin/systemctl * tomcat'
+       - 'tomcat ALL=(ALL) NOPASSWD: TOMCATCTL'
+       - 'tomcat ALL=(ALL) NOPASSWD: /usr/bin/sed, /usr/bin/tee'
+       - 'tomcat ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart sshd.service'
+       - 'tomcat ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop tomcat, /usr/bin/systemctl start tomcat'
+       - 'tomcat ALL= NOPASSWD: /usr/bin/setfacl -m u\:tomcat\:rw /etc/hosts'
+  
+  - name: Restart SSH service
+    systemd:
+      state: restarted
+      enabled: yes
+      name: sshd
+  
+  - name: Add additional configuration to /etc/hosts file
+    lineinfile:
+      path: /etc/hosts
+      line: "{{ item }}"
+      state: present
+    with_items:
+        - '10.48.176.147 rtdm-dev.sas.avivantt.com'
+        - '10.16.89.185 cc-ods-db-hostname'
+      
+  - name: Add tomcat user/group to log in using SSH
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      line: 'AllowGroups tomcat'    
+  
+  ############ SECURITY ##############
+  
+  - name: Create fake keystore files to add necessary permissions
+    file:
+      state: touch
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+      mode: 0600
+      path: "{{ item }}"
+    with_items:
+      - '/etc/pki/client_keystore.jks'
+      - '/etc/pki/gw_keystore.jks'
+  
+  - name: Set additional permissions for /etc/hosts
+    acl:
+      path: /etc/hosts
+      entity: tomcat
+      etype: user
+      permissions: rw
+      state: present
+  
+  ########### SSH keys for integrations #########
+  - name: Create .ssh directory for integration keys
+    file:
+      state: directory
+      path: "/home/tomcat/.ssh"
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+      mode: 0755
+  
+  - name: Copy ssh keys for integrations (/etc/ssh)
+    copy:
+      src: "{{ item }}"
+      dest: "/etc/ssh"
+      mode: 0744
+      owner: root
+      group: root
+    with_items:
+      - 'keys/CC/rsa_sftpgc1_private.ppk'
+      - 'keys/PC/DAVE_SFTPGQ1'
+  
+  - name: Copy ssh keys for integrations (/home/tomcat/.ssh)
+    copy:
+      src: "{{ item }}"
+      dest: "/home/tomcat/.ssh"
+      mode: 0744
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+    with_items:
+      - 'keys/PC/id_rsa_NUM6D99'
+      - 'keys/PC/PELICAN_SFTPGQ1.ppk'
+  
+  - name: modify webxml to fix tomcat welcome page(start-line)  
+    replace:
+      path: /opt/tomcat/app/conf/web.xml
+      regexp: '(\s+)<welcome-file-list>'  
+      replace: '<!--<welcome-file-list>'
+      backup: yes
+  - name: modify webxml to fix tomcat welcome page(end-line)  
+    replace:
+      path: /opt/tomcat/app/conf/web.xml
+      regexp: '(\s+)</welcome-file-list>' 
+      replace: '</welcome-file-list>-->'
+      backup: yes
+  
+  - name: rename ROOT under webapps directory
+    command: mv /opt/tomcat/app/webapps/ROOT /opt/tomcat/app/webapps/ROOT1
+  
+  - name: rename docs under webapps directory
+    command: mv /opt/tomcat/app/webapps/docs /opt/tomcat/app/webapps/docs1
+  
+  - name: Download postgresql-42.2.1.jre6
+    command: "/usr/local/bin/aws s3 cp s3://avivauknonprod/applications/guidewire/software/PostgreSQL/postgresql-42.2.1.jre6.jar /tmp"
+    become_user: ec2-user
+    become_method: enable
+  
+  - name: Changing the permission of postgresql-42.2.1.jre6.jar
+    copy:
+      src: /tmp/postgresql-42.2.1.jre6.jar
+      dest: "{{ tomcat_home }}/lib"
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_group }}"
+      mode: 0755
+  
+  - name: Deleting the downloaded files from tmp folder
+    file:
+      path: "{{ item }}"
+      state: absent
+      owner: root
+      group: root
+    with_items:
+      - '/tmp/postgresql-42.2.1.jre6.jar'   
+  - name: Install SSH welcome screen
+    copy:
+      src: motd
+      dest: "/etc/motd"
+      mode: 0644  
+  - name: Copy certs locally and install
+    copy:
+      src: ../../common/install.sh
+      dest: "/home/ec2-user/"
+      mode: 0755
+      owner: "ec2-user"
+      group: "ec2-user"
+  - name: Run local config script
+    shell: /home/ec2-user/install.sh
+

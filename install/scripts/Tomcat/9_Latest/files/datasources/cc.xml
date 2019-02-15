@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+# ******************
+# Managed by Puppet
+# ******************
+-->
+<Context docBase="cc" path="/cc">
+
+  <Resource name="jdbc/ccApplication"
+            url="jdbc:oracle:thin:@//rds-db-hostname:1521/GW01"
+            username="CCUSER"
+            password="CCUSER"
+            type="javax.sql.DataSource"
+            auth="Container"
+            driverClassName="oracle.jdbc.OracleDriver"
+            maxActive="20"
+            maxIdle="10"
+            maxWait="-1"
+            validationQuery="select 1 from dual"
+            testOnBorrow="true" />
+
+  <Resource name="jdbc/ccFinance"
+            url="jdbc:oracle:thin:@//rds-db-hostname:1521/GW01"
+            username="FINANCE_STAGING_CC"
+            password="FINANCE_STAGING_CC"
+            type="javax.sql.DataSource"
+            auth="Container"
+            driverClassName="oracle.jdbc.OracleDriver"
+            maxActive="20"
+            maxIdle="10"
+            maxWait="-1"
+            validationQuery="select 1 from dual"
+            testOnBorrow="true" />
+
+  <Resource name="jdbc/ccMiStaging"
+            url="jdbc:oracle:thin:@//rds-db-hostname:1521/GW01"
+            username="MI_STAGING_CC"
+            password="MI_STAGING_CC"
+            type="javax.sql.DataSource"
+            auth="Container"
+            driverClassName="oracle.jdbc.OracleDriver"
+            maxActive="20"
+            maxIdle="10"
+            maxWait="-1"
+            validationQuery="select 1 from dual"
+            testOnBorrow="true" />
+
+  <Resource name="jdbc/ccUnStaging"
+            url="jdbc:oracle:thin:@//rds-db-hostname:1521/GW01"
+            username="UNS_STAGING_CC"
+            password="UNS_STAGING_CC"
+            type="javax.sql.DataSource"
+            auth="Container"
+            driverClassName="oracle.jdbc.OracleDriver"
+            maxActive="20"
+            maxIdle="10"
+            maxWait="-1"
+            validationQuery="select 1 from dual"
+            testOnBorrow="true" />
+			
+  <Resource name="jdbc/ccReferenceData"
+            url="jdbc:oracle:thin:@//rds-db-hostname:1521/GW01"
+            username="RD_ACCESS"
+            password="RD_ACCESS"
+            type="javax.sql.DataSource"
+            auth="Container"
+            driverClassName="oracle.jdbc.OracleDriver"
+            maxActive="20"
+            maxIdle="10"
+            maxWait="-1"
+            validationQuery="select 1 from dual"
+            testOnBorrow="true" />
+
+  <Resource name="jdbc/ccHandlingRules"
+            url="jdbc:sqlserver://10.16.89.185:1433;DatabaseName=OperationalDataStore"
+            username="SQLGWCCIntgnUser"
+            password="9RnNntL1f"
+            type="javax.sql.DataSource"
+            auth="Container"
+            driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+
+</Context>

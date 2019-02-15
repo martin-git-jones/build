@@ -1,0 +1,60 @@
+- name: Increase ec2-user password expiry time
+  command: "chage -I -1 -m 0 -M 99999 -E -1 ec2-user"
+
+- name: Add GW Dev Support AD group to allow log in using SSH
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    line: 'AllowGroups acc_ukgi_gwdevsu'
+  
+- name: Add via.novonet to domain-search configuration
+  lineinfile:
+    path: "/etc/dhcp/dhclient-eth0.conf"
+    state: present
+    mode: 0500
+    create: yes
+    line: 'append domain-search "via.novonet";'
+
+- name: Add visudo configuration
+  lineinfile:
+    path: /etc/sudoers
+    line: "{{ item }}"
+    state: present
+  with_items:
+     - '%acc_ukgi_gwdevsu ALL=(ALL) NOPASSWD:ALL'
+     - 'Defaults    env_keep +=PATH'
+     - 'Defaults        exempt_group=ec2-user'
+
+- name: Restart SSH service
+  systemd:
+    state: restarted
+    enabled: yes
+    name: sshd
+
+- name: Remove root access from certain virtual terminals
+  lineinfile:
+    path: /etc/securetty
+    regexp: '(^((?!^console|^tty[0-9]+|vc\/[0-9]+).)*$)'
+    state: absent
+
+- name: Secure grub with password
+  lineinfile:
+    path: /boot/grub2/user.cfg
+    line: "GRUB2_PASSWORD={{ grub_password_string }}"
+    state: present
+    create: yes
+    
+- name: Install the latest version of httpd
+  yum:
+    name: httpd
+    state: latest
+
+- name: Install the latest version of php
+  yum:
+    name: php
+    state: latest
+    
+- name: Start and enable httpd service
+  systemd:
+    name: httpd
+    state: started
+    enabled: yes

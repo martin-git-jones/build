@@ -1,0 +1,100 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+# ******************
+# Managed by Puppet
+# ******************
+-->
+<Context docBase="pc" path="/pc">
+
+  <Resource name="jdbc/pcApplication"
+            url="jdbc:oracle:thin:@//rds-db-hostname:1521/GW01"
+            username="PC2USER"
+            password="PC2USER"
+            type="javax.sql.DataSource"
+            auth="Container"
+            driverClassName="oracle.jdbc.OracleDriver"
+            maxActive="20"
+            maxIdle="10"
+            maxWait="-1"
+            validationQuery="select 1 from dual"
+            testOnBorrow="true" />
+
+  <Resource name="jdbc/pcDmStaging"
+            url="jdbc:oracle:thin:@//rds-db-hostname:1521/GW01"
+            username="DM_STAGING_PC"
+            password="DM_STAGING_PC"
+            type="javax.sql.DataSource"
+            auth="Container"
+            driverClassName="oracle.jdbc.OracleDriver"
+            maxActive="20"
+            maxIdle="10"
+            maxWait="-1"
+            validationQuery="select 1 from dual"
+            testOnBorrow="true" />
+
+  <Resource name="jdbc/pcFinance"
+            url="jdbc:oracle:thin:@//rds-db-hostname:1521/GW01"
+            username="FINANCE_STAGING_PC"
+            password="FINANCE_STAGING_PC"
+            type="javax.sql.DataSource"
+            auth="Container"
+            driverClassName="oracle.jdbc.OracleDriver"
+            maxActive="20"
+            maxIdle="10"
+            maxWait="-1"
+            validationQuery="select 1 from dual"
+            testOnBorrow="true" />
+
+  <Resource name="jdbc/pcMiStaging"
+            url="jdbc:oracle:thin:@//rds-db-hostname:1521/GW01"
+            username="MI_STAGING_PC"
+            password="MI_STAGING_PC"
+            type="javax.sql.DataSource"
+            auth="Container"
+            driverClassName="oracle.jdbc.OracleDriver"
+            maxActive="20"
+            maxIdle="10"
+            maxWait="-1"
+            validationQuery="select 1 from dual"
+            testOnBorrow="true" />
+
+  <Resource name="jdbc/pcUnStaging"
+            url="jdbc:oracle:thin:@//rds-db-hostname:1521/GW01"
+            username="UNS_STAGING_PC"
+            password="UNS_STAGING_PC"
+            type="javax.sql.DataSource"
+            auth="Container"
+            driverClassName="oracle.jdbc.OracleDriver"
+            maxActive="20"
+            maxIdle="10"
+            maxWait="-1"
+            validationQuery="select 1 from dual"
+            testOnBorrow="true" />
+
+  <Resource name="jdbc/pcReferenceData"
+            url="jdbc:oracle:thin:@//rds-db-hostname:1521/GW01"
+            username="rd_user"
+            password="RD_USER"
+            type="javax.sql.DataSource"
+            auth="Container"
+            driverClassName="oracle.jdbc.OracleDriver"
+            maxActive="20"
+            maxIdle="10"
+            maxWait="-1"
+            validationQuery="select 1 from dual"
+            testOnBorrow="true" />
+			
+  <Resource name="jdbc/pcCEDSData"
+            url="jdbc:postgresql://euw1adgwcedp002.aws-db-conn.dev.aws-euw1-np.avivacloud.com:5432/ceds_sprint?sslmode=require"
+            username="ceds_gw_user"
+            password="TiGeR.is@.GRe@T"
+            type="javax.sql.DataSource"
+            auth="Container"
+            driverClassName="org.postgresql.Driver"
+            maxActive="20"
+            maxIdle="10"
+            maxWait="-1"
+            validationQuery="select 1"
+            testOnBorrow="true" />
+
+</Context>

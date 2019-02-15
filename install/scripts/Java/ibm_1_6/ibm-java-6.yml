@@ -1,0 +1,19 @@
+---
+- hosts: tag_GW_JavaVersion_IBM_1_6
+  user: ec2-user
+  become: True
+  tasks:
+  - name: copy-java-6-install-script
+    copy: 
+     src: install-java-ibm-6rp7.sh 
+     dest: /home/ec2-user/install-java-ibm-6rp7.sh
+     owner: ec2-user
+     group: ec2-user
+     mode: 0750
+  - name: Run install script
+    shell: sudo /home/ec2-user/install-java-ibm-6rp7.sh 
+
+  environment:
+    http_proxy: http://uknp-obproxy.avivaaws.com:80
+    https_proxy: http://uknp-obproxy.avivaaws.com:80
+    no_proxy: "localhost,127.0.0.1,.via.novonet,.avivagroup.com,.avivaaws.com,.ecs.com,169.254.169.254,.stash.aviva.co.uk,10.64."

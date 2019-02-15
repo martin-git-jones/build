@@ -1,0 +1,12 @@
+---
+- hosts: tag_GW_JavaVersion_1_6_Latest
+  user: ec2-user
+  sudo: yes
+  tasks:
+  - name: Install openjava_1.6
+    yum:
+      name: java-1.6.0-openjdk 
+      state: present
+  - name: Set default Java version
+    shell: /usr/sbin/alternatives --set java   /usr/lib/jvm/jre-1.6.0-openjdk.x86_64/bin/java
+

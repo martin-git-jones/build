@@ -1,0 +1,65 @@
+- name: Install additional package
+  yum:
+    name: mailcap
+    state: present
+
+- name: Create symbolic link to libc.so.6
+  file:
+    state: link
+    src: /usr/lib64/libc.so.6
+    dest: /lib/libc.so.6
+    mode: 0755
+
+- name: Create temp directory
+  file:
+    path: /opt/java
+    state: directory
+    mode: 0755
+
+- name: Download IBM Java installation package
+  get_url:
+    url: "{{ ibm_java_url }}/{{ ibm_java_bin }}"
+    dest: "/opt/java/{{ ibm_java_bin }}"
+    mode: 0755
+
+# - name: Copy IBM Java installation properties file
+#   copy:
+#     src: "{{ ibm_java_installer_properties }}"
+#     dest: "/opt/java/installer.properties"
+#     mode: 0755
+#
+# - name: Install IBM Java
+#   command: "/opt/java/{{ ibm_java_bin }} -f /opt/java/installer.properties -i silent warn=no"
+#   register: command_result
+#   failed_when: "'FAILED' in command_result.stderr"
+
+- name: Install IBM Java
+  command: "/opt/java/{{ ibm_java_bin }} -DLICENSE_ACCEPTED=TRUE -DUSER_INSTALL_DIR={{ java_home }} -i silent warn=no"
+  register: command_result
+  failed_when: "'FAILED' in command_result.stderr"
+
+- name: Link Java
+  file:
+    state: link
+    src: "{{ java_home }}/jre/bin/java"
+    dest: "{{ java_home }}/bin/java"
+    mode: 0755
+
+- name: Disable weak ciphers for SSL negotiation
+  lineinfile:
+    path: "{{ java_home }}/jre/lib/security/java.security"
+    regexp: "^jdk.tls.disabledAlgorithms="
+    line: "jdk.tls.disabledAlgorithms=SSLv3, RC4, DH keySize < 768, 3DES_EDE_CBC, DES"
+    backrefs: yes
+
+- name: Download unrestricted policy files for IBM Java
+  get_url:
+    url: "{{ ibm_java_url }}/{{ item }}"
+    dest: "{{ java_home }}/jre/lib/security/{{ item }}"
+    force: yes
+    mode: 0644
+    owner: root
+    group: root
+  with_items:
+    - 'local_policy.jar'
+    - 'US_export_policy.jar'

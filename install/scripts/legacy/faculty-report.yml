@@ -1,0 +1,8 @@
+---
+- name: Create facultyMapping path and add chmod to path.
+  file:
+    path: /opt/tomcat/app/facultyMapping
+    state: directory
+    mode: 0755
+    owner: tomcat
+    group: tomcat

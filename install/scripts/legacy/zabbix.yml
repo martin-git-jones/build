@@ -1,0 +1,16 @@
+- hosts: 127.0.0.1
+  vars:
+    grub_password_string: "grub.pbkdf2.sha512.10000.0424DA7E03B83A2CB4C73C7E914DDA252BB5FCC313CEEA3049D2CF114592FEF6A8DD6DEE3C19669753178D4F0FA860D57A08DE48D88E2DA183BF6DAF45DDBEDF.0D7733C01D56118F602F14A9F02722779D8D40028F6C124553946F2CD36FDDE75A427DB2E9913EAC36960C6559F411EA6020C01D12EB284A38CF624820F46BC1"
+
+  pre_tasks:
+  - include: tasks/install_packages.yml
+  - include: tasks/install_package_groups.yml
+  
+  tasks:
+  - include: tasks/install_zabbix.yml
+  - include: tasks/open_ports.yml
+  - include: tasks/set_frontend.yml
+  - include: tasks/insert_config.yml
+   
+  post_tasks:
+  - include: tasks/security.yml

@@ -1,0 +1,31 @@
+- hosts: 127.0.0.1
+  connection: local
+  become: yes
+  tasks:
+  - name: Remove root access from certain virtual terminals
+    lineinfile:
+     path: /etc/securetty
+     regexp: '(^((?!^console|^tty[0-9]+|vc\/[0-9]+).)*$)'
+     state: absent
+    
+  - name: Add via.novonet to domain-search configuration
+    lineinfile:
+     path: "/etc/dhcp/dhclient-eth0.conf"
+     state: present
+     mode: 0500
+     create: yes
+     line: 'append domain-search "via.novonet";'
+    
+  - name: Install GW shell alises
+    copy:
+     src: aliases/
+     dest: "/etc/profile.d"
+     mode: 0644
+
+  - name: Increase ec2-user password expiry time
+    command: "chage -I -1 -m 0 -M 99999 -E -1 ec2-user"
+
+  - name: Add GW Dev Support AD group to allow log in using SSH
+    lineinfile:
+     path: /etc/ssh/sshd_config
+     line: 'AllowGroups acc_ukgi_gwdevsu'

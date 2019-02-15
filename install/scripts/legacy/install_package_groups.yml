@@ -1,0 +1,31 @@
+- name: Install the 'Development tools' package group
+  yum:
+    name: "@Development Tools"
+    state: present
+    validate_certs: no
+
+- name: Install the 'Additional Development' package group
+  yum:
+    name: "@Development Tools"
+    state: present
+    validate_certs: no
+    
+- name: Install the 'PHP Support' package group
+  yum:
+    name: "@PHP Support"
+    state: present
+    exclude: curl
+    validate_certs: no
+
+- name: Install the 'PostgreSQL Database Client' package group
+  yum:
+    name: "@PostgreSQL Database Client"
+    state: present
+    validate_certs: no
+
+- name: Install the 'Web Server' package group
+  yum:
+    name: "@Web Server"
+    state: present
+    exclude: curl
+    validate_certs: no

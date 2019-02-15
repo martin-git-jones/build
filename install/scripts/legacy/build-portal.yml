@@ -1,0 +1,23 @@
+---
+- name: Change chmod for BuildPortal.xml file.
+  file:
+    path: /opt/tomcat/app/conf/Catalina/localhost/BuildPortal.xml
+    mode: 0755
+    owner: tomcat
+    group: tomcat
+    
+- name: Download PostgreSQL for Tomcat.
+  get_url:
+    url: "http://nexus-pre.avivaaws.com/nexus/content/repositories/guidewire-releases/com/aviva/ukgi/gw/files/postgresql-9.3-1102-jdbc4.jar"
+    dest: "/opt/tomcat/app/lib/postgresql-9.3-1102-jdbc4.jar"
+    mode: 0755
+    owner: tomcat
+    group: tomcat
+    
+- name: Download BuildPortal.war file.
+  get_url:
+    url: "http://nexus-pre.avivaaws.com/nexus/content/repositories/guidewire-releases/com/aviva/ukgi/gw/files/BuildPortal.war"
+    dest: "/opt/tomcat/app/webapps/BuildPortal.war"
+    mode: 0755
+    owner: tomcat
+    group: tomcat

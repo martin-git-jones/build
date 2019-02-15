@@ -1,0 +1,38 @@
+- hosts: 127.0.0.1
+  vars:
+    dedicated_java: "yes"
+    ibm_java_url: "http://nexus-pre.avivaaws.com/nexus/service/local/repositories/guidewire-releases/content/com/aviva/ukgi/gw/files"
+    ibm_java_bin: "ibm-java-x86_64-sdk-6.0-16.7.bin"
+    java_home: "/usr/java/ibm-java-x86_64-60"
+    tomcat_home: /opt/tomcat/app
+    tomcat_version: "7.0.67"
+    tomcat_pkg_url: "http://nexus-pre.avivaaws.com/nexus/service/local/repositories/guidewire-releases/content/com/aviva/ukgi/gw/files/apache-tomcat-7.0.67.tar.gz"
+    grub_password_string: "grub.pbkdf2.sha512.10000.0424DA7E03B83A2CB4C73C7E914DDA252BB5FCC313CEEA3049D2CF114592FEF6A8DD6DEE3C19669753178D4F0FA860D57A08DE48D88E2DA183BF6DAF45DDBEDF.0D7733C01D56118F602F14A9F02722779D8D40028F6C124553946F2CD36FDDE75A427DB2E9913EAC36960C6559F411EA6020C01D12EB284A38CF624820F46BC1"
+     
+  pre_tasks:
+  - name: Install Packages
+    yum:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - vim
+      - dos2unix
+      - mailcap
+  - include: tasks/ibm_java.yml
+  
+  roles:
+    - role: pzs.tomcat
+            
+  post_tasks:
+  - include: tasks/gw-aviva.yml
+# - include: tasks/app_dynamics.yml
+  - include: tasks/nodejs.yml
+  - include: tasks/grunt.yml
+  - include: tasks/legacy-news.yml
+  - include: tasks/faculty-report.yml
+  - include: tasks/build-portal.yml
+
+  environment:
+    http_proxy: http://uknp-obproxy.avivaaws.com:80
+    https_proxy: http://uknp-obproxy.avivaaws.com:80
+    no_proxy: "localhost,127.0.0.1,.via.novonet,.avivagroup.com,.avivaaws.com,.ecs.com,169.254.169.254,.stash.aviva.co.uk,10.64.,10.64.106.210"

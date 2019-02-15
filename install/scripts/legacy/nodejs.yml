@@ -1,0 +1,12 @@
+---
+- name: Download Node.js 7.4.0 file.
+  get_url:
+    url: "http://nexus-pre.avivaaws.com/nexus/content/repositories/guidewire-releases/com/aviva/ukgi/gw/files/nodejs-7.4.0.rpm"
+    dest: "/tmp/nodejs-7.4.0.rpm"
+  when: node_version is undefined
+
+- name: Install Node.
+  package:
+    name: "/tmp/nodejs-7.4.0.rpm"
+    state: installed
+  when: node_version is undefined
